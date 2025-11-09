@@ -787,7 +787,7 @@
     <script src="assets/js/YTPlayer.min.js"></script>
     <script src="assets/js/main.js"></script>
     
-    <!-- Contact Form Script -->
+    <!-- Contact Form Script - UPDATED VERSION -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('contact-form');
@@ -805,16 +805,35 @@
                 const xhr = new XMLHttpRequest();
                 
                 xhr.open('POST', form.action, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+                
                 xhr.onload = function() {
                     if (xhr.status === 200) {
-                        formMessage.textContent = 'Thank you! Your message has been sent.';
-                        formMessage.style.color = '#28a745';
-                        form.reset();
-                        
-                        // Hide success message after 5 seconds
-                        setTimeout(() => {
-                            formMessage.textContent = '';
-                        }, 5000);
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.ok) {
+                                formMessage.textContent = 'Thank you! Your message has been sent.';
+                                formMessage.style.color = '#28a745';
+                                form.reset();
+                                
+                                // Hide success message after 5 seconds
+                                setTimeout(() => {
+                                    formMessage.textContent = '';
+                                }, 5000);
+                            } else {
+                                formMessage.textContent = response.error || 'Oops! Something went wrong. Please try again.';
+                                formMessage.style.color = '#dc3545';
+                            }
+                        } catch (error) {
+                            // If JSON parsing fails, but status is 200, consider it a success
+                            formMessage.textContent = 'Thank you! Your message has been sent.';
+                            formMessage.style.color = '#28a745';
+                            form.reset();
+                            
+                            setTimeout(() => {
+                                formMessage.textContent = '';
+                            }, 5000);
+                        }
                     } else {
                         formMessage.textContent = 'Oops! Something went wrong. Please try again.';
                         formMessage.style.color = '#dc3545';
@@ -822,7 +841,7 @@
                 };
                 
                 xhr.onerror = function() {
-                    formMessage.textContent = 'An error occurred during the request. Please try again.';
+                    formMessage.textContent = 'Network error. Please check your connection and try again.';
                     formMessage.style.color = '#dc3545';
                 };
                 
